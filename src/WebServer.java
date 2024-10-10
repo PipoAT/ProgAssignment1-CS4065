@@ -4,6 +4,7 @@
 **/
 import java.io.* ;
 import java.net.* ;
+import java.util.StringTokenizer;
 
 public final class WebServer
 {
@@ -38,7 +39,7 @@ final class HttpRequest implements Runnable
     // Constructor
     public HttpRequest(Socket socket) throws Exception 
     {
-    this.socket = socket;
+        this.socket = socket;
     }
 
     // Implement the run() method of the Runnable interface.
@@ -46,7 +47,8 @@ final class HttpRequest implements Runnable
     {
         try {
             processRequest();
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             System.out.println(e);
         }
     }
@@ -69,16 +71,19 @@ final class HttpRequest implements Runnable
             return "text/html";
         }
 
-        if(?) {
-            ?;
+        // check if the file name is a GIF
+        if(fileName.endsWith(".gif")) {
+            return "image/gif";
         }
 
-        if(?) {
-            ?;
+        // check if the file name is a JPG
+        if(fileName.endsWith(".jpeg") || fileName.endsWith(".jpg")) {
+            return "image/jpeg";
         }
         
         return "application/octet-stream";
     }
+
 
     private void processRequest() throws Exception
     {
@@ -122,13 +127,13 @@ final class HttpRequest implements Runnable
         String contentTypeLine = null;
         String entityBody = null;
         if (fileExists) {
-            statusLine = ?;
+            statusLine = "HTTP/1.1 200 OK" + CRLF;
             contentTypeLine = "Content-type: " +
             contentType( fileName ) + CRLF;
         } 
         else {
-            statusLine = ?;
-            contentTypeLine = ?;
+            statusLine = "HTTP/1.1 404 Not Found" + CRLF;
+            contentTypeLine = "Content-type: text/html" + CRLF;
             entityBody = "<HTML>" +
             "<HEAD><TITLE>Not Found</TITLE></HEAD>" +
             "<BODY>Not Found</BODY></HTML>";
@@ -137,7 +142,7 @@ final class HttpRequest implements Runnable
         // Send the status line.
         os.writeBytes(statusLine);
         // Send the content type line.
-        os.writeBytes(?);
+        os.writeBytes(contentTypeLine);
         // Send a blank line to indicate the end of the header lines.
         os.writeBytes(CRLF);
 
@@ -147,7 +152,7 @@ final class HttpRequest implements Runnable
             fis.close();
         } 
         else {
-            os.writeBytes(?);
+            os.writeBytes(entityBody);
         }
 
         // close the output stream, buffered reader, and socket
