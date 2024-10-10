@@ -36,18 +36,28 @@ public class FtpClient {
     public void connect(String username, String password) {
         try {
             // establish the control socket
-            ?
+            controlSocket = new Socket("ftp.example.com", 21);
 
             // get references to the socket input and output streams
-            ?
+            controlReader = new BufferedReader(new InputStreamReader(controlSocket.getInputStream()));
+            controlWriter = new DataOutputStream(controlSocket.getOutputStream());
 
             // check if the initial connection response code is OK
-            if (checkResponse(?)) {
+            String response = controlReader.readLine();
+            if (checkResponse(Integer.parseInt(response.substring(0, 3)))) {
                 System.out.println("Succesfully connected to FTP server");
             }
 
             // send user name and password to ftp server
-            ?
+            controlWriter.writeBytes("USER " + username + "\r\n");
+            controlWriter.flush();
+            if (checkResponse(Integer.parseInt(controlReader.readLine().substring(0, 3)))) {
+                controlWriter.writeBytes("PASS " + password + "\r\n");
+                controlWriter.flush();
+                if (checkResponse(Integer.parseInt(controlReader.readLine().substring(0, 3)))) {
+                    System.out.println("Logged in successfully");
+                }
+            }
 
         } catch (UnknownHostException ex) {
             System.out.println("UnknownHostException: " + ex);
