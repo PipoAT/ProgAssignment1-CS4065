@@ -71,24 +71,26 @@ public class FtpClient {
      * @param file_name: the name of the file to retrieve
      */
     public void getFile(String file_name) {
-	int data_port = 0; // initialize the data port        
-	try {
+        int data_port = 0; // initialize the data port        
+        try {
             // change to current (root) directory first
-            sendCommand(?);
+            sendCommand("CWD /" + CRLF, 250);
 
             // set to passive mode and retrieve the data port number from response
-            currentResponse = sendCommand(?);
-            data_port = ?;
+            currentResponse = sendCommand("PASV" + CRLF, 227);
+            data_port = extractDataPort(currentResponse);
 
             // connect to the data port 
-            Socket data_socket = ?
-            DataInputStream data_reader = ?
+            Socket data_socket = new Socket(controlSocket.getInetAddress(), data_port);
+            DataInputStream data_reader = new DataInputStream(data_socket.getInputStream());
 
             // download file from ftp server
-            ?
+            sendCommand("RETR " + file_name + CRLF, 150);
 
-            // check if the transfer was succesful
-            ?
+            // check if the transfer was successful
+            if (checkResponse(226)) {
+                System.out.println("File transfer successful");
+            }
 
             // Write data on a local file
             createLocalFile(data_reader, file_name);
